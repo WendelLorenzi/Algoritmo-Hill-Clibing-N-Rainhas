@@ -1,5 +1,7 @@
 # Algoritmo Hill Climbing para solucionar o problema das N rainhas
+<ul>
 	O problema das N-rainhas consiste em dispor N rainhas em um tabuleiro de tamanho NxN, de maneira em que nenhuma rainha consiga atacar outra rainha. A fim de resolver computacionalmente o problema proposto foi utilizada a técnica conhecida como Hillclimbing, que será brevemente explicada abaixo.
+</ul>
 
 ## Hillclimbing
 <ul>
