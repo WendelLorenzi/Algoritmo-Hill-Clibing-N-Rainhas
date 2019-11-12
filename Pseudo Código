@@ -1,0 +1,207 @@
+Inteiro n
+
+Estrutura lista{
+	Inteiro linha
+	Estrutura lista *prox
+} Lista
+
+Estrutura fila{
+	Lista *ini
+	Lista *fim
+} Fila
+
+void Empurra(Fila *f, Inteiro Posicao){
+	Lista *novo = (Lista*) aloca(tamanho(Lista))
+	novo->linha= posicao
+	novo->prox= NULL
+		Se(f->ini == NULL){
+		 f->ini= novo
+		 f->fim= novo
+		} senão{
+         f->fim->prox = novo
+         f->fim = novo
+		}
+}
+
+void Limpa(Fila *f){
+	Se(f->ini != NULL){
+	Lista *aux= f->ini
+    f->ini = f->ini->prox
+	} Se(f->ini == NULL){
+	 f->fim= NULL
+	}
+	desaloca(aux)
+	Limpa(f)
+}
+
+Inteiro aleatorio(Fila *f){
+    Lista *aux = f->ini
+
+    Inteiro tam = 0
+    Enquanto(aux != NULL){
+		tam++
+        aux = aux->prox 
+	}
+    
+    aux = f->ini
+
+    srand((unsigned)time(NULL))// 
+    Inteiro sorteado = Aleatorio() % tam
+    
+    Para(Inteiro i = 0; i < sorteado; i++){
+        aux = aux->prox
+    }
+    retorno aux->linha
+}
+
+void geraAleatorio(Inteiro *tabuleiro){
+    srand((unsigned)time(NULL));
+    Para(Inteiro i = 0; i < n; i++){
+        tabuleiro[i] = rand() % n;
+    }
+}
+
+void impTabuleiro(Inteiro *tabuleiro){
+    Imprime("\n\n")
+    //linhas
+    Para(Inteiro i = 0; i < n; i++){
+        //colunas
+        Para(Inteiro j = 0; j < n; j++){
+            Se(tabuleiro[j] == i){
+                Imprime("| R ")
+            }senão{
+                Imprime("| - ")
+            }
+        }
+        Imprime("|\n")
+    }
+}
+
+Inteiro contAtk(Inteiro *tabuleiro){
+    //Conta quantos ataques estão ocorrendo
+    Inteiro qtdAtk = 0
+    Para (Inteiro i = 0; i < n - 1; i++){
+        Para (Inteiro j = i + 1; j < n; j++){
+        	//verifica se está na mesma linha
+            Se (tabuleiro[i] == tabuleiro[j]){
+                qtdAtk= qtdAtk + 1
+                continue
+            }
+            //verifica se está na mesma diagonal
+            Se (tabuleiro[i] - tabuleiro[j] == i - j){
+                qtdAtk= qtdAtk + 1
+                continue
+            }
+            //verifica se esta na mesma diagonal
+            Se (tabuleiro[i] - tabuleiro[j] ==  j - i){
+                qtdAtk= qtdAtk + 1
+                continue;
+            }
+        }
+    }
+    retorno qtdAtk;
+}
+
+//Deixa tudo na posição em que acontece a menor quantidade de ataques
+Inteiro *melhoraTabuleiro(Inteiro *tabuleiro){
+    Fila *decisao = (Fila*) aloca(tamanho(Fila))
+    decisao->ini = NULL
+    decisao->fim = NULL
+
+    Inteiro temp, qtdAtk, k
+
+    //Quantidade de ataques no tabuleiro original
+    Inteiro atkOri = contAtk(tabuleiro)
+
+    Inteiro *tab2 = aloca(n * tamanho(int))
+
+    //Criando cópia do tabuleiro
+    Para(Inteiro i = 0; i < n; i++){
+        tab2[i] = tabuleiro[i]
+    }
+
+    Para(Inteiro i = 0; i < n; i++){
+        Limpa(decisao)
+        Empurra(decisao, tab2[i])
+
+        temp = tab2[i]
+
+        Para(Inteiro j = 0; j < n; j++){
+            //Testa a quantidade de ataques para todas as posições da coluna, escolhendo como posição final o local com menos ataques
+            tab2[i] = j
+
+            //k é o número de ataques para a nova posição
+            k = contAtk(tab2)
+
+            //Se a quantidade de ataques para a nova posição for igual, não faz diferença
+            Se (k == atkOri){
+                Empurra(decisao, j)
+            }
+
+            //Neste caso temos uma posição melhor que a original
+            Se (k < atkOri){
+                Limpa(decisao)
+                Empurra(decisao, j)
+                atkOri = k
+            }
+        }
+
+Boleano tentaMelhora(Inteiro *tabuleiro){
+    //Quantidade de ataques no tabuleiro original
+    Inteiro atkOri = contAtk(tabuleiro)
+
+    Inteiro *tentativa = melhoraTabuleiro(tabuleiro)
+    Inteiro novoAtk = contAtk(tentativa)
+
+    //Verifica se o novo tabuleiro tem menos ataques que o original
+    Se (novoAtk < atkOri){
+        Para (int i = 0; i < n; i++){
+            tabuleiro[i] = tentativa[i];
+        }
+
+        //Tabuleiro melhor encontrado
+        retorno verdadeiro;
+    }
+
+    //Não foi possível encontrar um tabuleiro melhor
+    retorno falso;
+}
+
+Inteiro *resolveRainhas(Inteiro *tabuleiro){
+    Enquanto(contAtk(tabuleiro) != 0){
+        Se (tentaMelhora(tabuleiro) == false){
+            retorno (tabuleiro);
+        }
+    }
+
+    retorno (tabuleiro);
+}
+
+Inicio(){
+    //Pegando a quantidade de rainhas pelo teclado
+    Imprime("\nQuantidade de Rainhas: \t")
+    Leia(n)
+
+    Enquanto(n < 4){
+        Imprime("\nNao existe solucao pra menos de 4 rainhas")
+        Imprime("\nQuantidade de Rainhas: \t")
+        Leia(n)
+    }
+
+    Inteiro *tabuleiro = aloca(n * tamanho(int));
+
+    geraAleatorio(tabuleiro)
+
+    impTabuleiro(tabuleiro)
+    Imprime("Quantidade de ataques no tabuleiro inicial: %i", contAtk(tabuleiro))
+
+    Fila *teste = (Fila*) aloca(tamanho(Fila))
+    teste->ini = NULL
+    teste->fim = NULL
+    
+    Inteiro *resultado = resolveRainhas(tabuleiro)
+    impTabuleiro(resultado)
+    Imrpime("Quantidade de ataques no tabuleiro final: %i", contAtk(resultado));
+
+    retorno 0;
+}
